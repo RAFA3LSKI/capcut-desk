@@ -23,9 +23,11 @@ export function createEngine(dir=path.join(os.homedir(),'.capcut-desk'),uploader
   // Silent refresh: the server kills an access token at ~70 h although expires_in says 72 h, and the refresh token rotates on every use.
   // So refresh when the token is older than 12 h, and once more if CapCut answers "invalid token". Re-read the file first: another copy of the app may have refreshed already.
   // Per account: the id is captured by the caller, so a refresh only ever reads and writes that account's token file.
-  async function refresh(id,seen){const t=load(TOK(id)); if(t.at!==seen&&t.at>Date.now()-6e4)return t.access_token; // ponytail: no file lock, a simultaneous refresh from 2 copies can still lose; add a lock if it shows up
+  const inflight=new Map(); // one refresh per account at a time: parallel polls share it, so the rotated refresh token is never spent twice
+  const refresh=(id,seen)=>{if(!inflight.has(id))inflight.set(id,doRefresh(id,seen).finally(()=>inflight.delete(id))); return inflight.get(id);};
+  async function doRefresh(id,seen){const t=load(TOK(id)); if(t.at!==seen&&t.at>Date.now()-6e4)return t.access_token; // ponytail: no file lock, a simultaneous refresh from 2 copies can still lose; add a lock if it shows up
     const dead=()=>{A.update(id,{status:'expired'}); return new Error(EXPIRED);};
-    if(!t.refresh_token)throw dead(); let x; try{x=await form(OA+'/token',{grant_type:'refresh_token',refresh_token:t.refresh_token,client_id:t.client_id});}catch{throw dead();} save(TOK(id),{...t,...x,at:Date.now()}); return x.access_token;}
+    if(!t.refresh_token)throw dead(); let x; try{x=await form(OA+'/token',{grant_type:'refresh_token',refresh_token:t.refresh_token,client_id:t.client_id});}catch(e){if(/ 4\d\d$/.test(e.message))throw dead(); throw new Error('Could not reach CapCut to renew the sign-in. Nothing was lost; try again in a minute.');} save(TOK(id),{...t,...x,at:Date.now()}); return x.access_token;}
   async function token(){if(!has())throw new Error('No CapCut account is connected. Open Account and press Add account.'); const id=A.active().id, t=load(TOK(id)); return t.refresh_token&&Date.now()>t.at+12*36e5?refresh(id,t.at):t.access_token;}
   async function rpc(method,params,notify=false){
     const h={'content-type':'application/json',accept:'application/json, text/event-stream',authorization:'Bearer '+await token()}; if(mcpSid)h['mcp-session-id']=mcpSid;
