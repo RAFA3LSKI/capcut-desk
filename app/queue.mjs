@@ -32,6 +32,9 @@ export function checkSpec(s){
 
 export function createQueue({engine,file,outDir,sleep=ms=>new Promise(r=>setTimeout(r,ms)),minPoll=5000,now=()=>new Date()}){
   let jobs=[]; try{jobs=JSON.parse(fs.readFileSync(file,'utf8'));}catch{}
+  const tag=()=>{const a=engine.active?.(); return a?{accountId:a.id,nickname:a.nickname}:{};};
+  const first=engine.accounts?.().accounts.find(a=>a.id==='1'); // jobs from before accounts existed belong to account 1 (or to an unnamed earlier account if it is gone)
+  for(const j of jobs)if(!j.accountId)Object.assign(j,first?{accountId:'1',nickname:first.nickname}:{accountId:'0',nickname:'earlier account'});
   for(const j of jobs)if(j.status==='running')j.status='queued'; // restart: keeps task_id, so it resumes polling and never resubmits
   const persist=()=>{fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file+'.tmp',JSON.stringify(jobs,null,1),{mode:0o600});fs.renameSync(file+'.tmp',file);};
   const set=(j,p)=>{Object.assign(j,p);persist();};
@@ -39,7 +42,7 @@ export function createQueue({engine,file,outDir,sleep=ms=>new Promise(r=>setTime
   const free=(day,name)=>{fs.mkdirSync(path.join(outDir,day),{recursive:true}); let i=1; return ()=>{let f; do f=path.join(outDir,day,`${name} ${i++}.mp4`); while(fs.existsSync(f)); return f;};};
 
   async function run(j){
-    set(j,{status:'running',error:undefined});
+    set(j,{status:'running',error:undefined,...(j.task_id?{}:tag())}); // not yet submitted: it runs, and is tagged, under the account active now. ponytail: a job polling under another account than it was submitted with needs per-call accountId
     try{
       if(!j.task_id){
         if(!j.generate_id){const r=await engine.generate(j.spec); if(!r.confirm)throw new Error('connector did not ask for confirmation'); set(j,{generate_id:r.confirm.generate_id,unique_key:r.confirm.unique_key,quoted:r.confirm.credits});}
@@ -63,7 +66,7 @@ export function createQueue({engine,file,outDir,sleep=ms=>new Promise(r=>setTime
   function pump(){ if(pumping)return pumping; return pumping=(async()=>{await null; for(let j;(j=jobs.find(x=>x.status==='queued'));)await run(j);})().finally(()=>{pumping=null;}); } // await null: finally can never run before the assignment
   return {
     jobs:()=>jobs, idle:()=>pumping||Promise.resolve(), start:pump,
-    add({name,spec,ceiling}){checkSpec(spec); const j={id:crypto.randomUUID().slice(0,8),name:(String(name||spec.prompt.slice(0,30)).replace(/[\\/:*?"<>|\x00-\x1f]/g,' ').trim()||'clip').slice(0,60),spec,ceiling:+ceiling||0,status:'queued',createdAt:now().toISOString()}; jobs.push(j);persist();pump();return j;},
+    add({name,spec,ceiling}){checkSpec(spec); const j={id:crypto.randomUUID().slice(0,8),name:(String(name||spec.prompt.slice(0,30)).replace(/[\\/:*?"<>|\x00-\x1f]/g,' ').trim()||'clip').slice(0,60),spec,ceiling:+ceiling||0,status:'queued',createdAt:now().toISOString(),...tag()}; jobs.push(j);persist();pump();return j;},
     approve(id,ceiling){const j=jobs.find(x=>x.id===id); if(j?.status!=='needs_approval')throw new Error('job is not waiting for approval'); set(j,{ceiling:+ceiling,status:'queued'});pump();return j;},
     retry(id){const j=jobs.find(x=>x.id===id); if(j?.status!=='failed'||!j.task_id)throw new Error('only a failed job that CapCut already accepted can be retried'); set(j,{status:'queued'});pump();return j;}, // keeps task_id: polls and downloads again, no new charge
     async cancel(id){const j=jobs.find(x=>x.id===id); if(!j||DONE.has(j.status))throw new Error('job is already finished'); const t=j.task_id; set(j,{status:'cancelled'}); if(t)await engine.cancel(t).catch(()=>{}); return j;},

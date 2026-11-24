@@ -9,6 +9,6 @@ Make AI videos (Seedance) with your own CapCut account and credits. Every clip k
 5. Type a prompt, check the price shown, press generate. Start with a 2-second 480p clip (2 credits) to try it.
 6. Updates: when a new version exists, a bar at the top says so. Download it and replace the app; your account and clips stay.
 
-If your sign-in expires, the app says so. Press Connect CapCut again.
+Several accounts: Account > **Add account** signs in another CapCut account (use it when one runs out of credits). **Switch** picks which one makes new videos; **Remove** forgets only the sign-in. History and clips of every account stay, and you can filter by account. If a sign-in expires, press **Reconnect** on that account. AI assistants get a `switch_account` tool.
 
 Developers: `app/` is the code (`node app/main.mjs`), `sh packaging/build.sh` builds the zips, `sh release.sh` tags and uploads a release (bump `app/version.mjs` first).

@@ -2,9 +2,10 @@
 // Usage: node session-check.mjs    Spends nothing.
 import fs from 'node:fs'; import os from 'node:os';
 import {createEngine} from './app/engine.mjs';
-const MCP='https://www.capcut.com/api/external_mcp'; let t=JSON.parse(fs.readFileSync(os.homedir()+'/.capcut-desk/token.json','utf8'));
+const MCP='https://www.capcut.com/api/external_mcp'; const D=os.homedir()+'/.capcut-desk', tokFile=()=>{const a=JSON.parse(fs.readFileSync(D+'/accounts.json','utf8')); return D+'/token-'+a.active+'.json';}; // active account's token (multi-account)
+let t=JSON.parse(fs.readFileSync(tokFile(),'utf8'));
 await createEngine().profile().catch(()=>{}); // same code path as the app: refreshes the token if older than 12 h and saves it
-t=JSON.parse(fs.readFileSync(os.homedir()+'/.capcut-desk/token.json','utf8'));
+t=JSON.parse(fs.readFileSync(tokFile(),'utf8'));
 let sid, n=0;
 const rpc=async(method,params,id=true)=>{const h={'content-type':'application/json',accept:'application/json, text/event-stream',authorization:'Bearer '+t.access_token}; if(sid)h['mcp-session-id']=sid;
   const r=await fetch(MCP,{method:'POST',headers:h,body:JSON.stringify({jsonrpc:'2.0',...(id?{id:++n}:{}),method,params})}); sid=r.headers.get('mcp-session-id')||sid; return r.text();};

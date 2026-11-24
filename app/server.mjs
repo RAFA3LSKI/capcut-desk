@@ -1,4 +1,5 @@
 // CapCut Desk server: 127.0.0.1 only. DRY=1 uses the fake engine. Env: PORT, DESK_DIR (data), DESK_OUT (clips), NO_BROWSER=1 or --no-browser (do not open the browser).
+if(process.env.CAPCUT_DESK_HOSTED==='1'){await (await import('./hosted.mjs')).startHosted(); await new Promise(()=>{});} // hosted prototype: own server, the desktop code below never runs
 import {fileURLToPath} from 'node:url'; import http from 'node:http'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import {execFile} from 'node:child_process';
 import {checkUpdate} from './update.mjs'; import {assistants} from './assistants.mjs'; import {remoteOn,remoteOff,remoteStatus} from './remote.mjs';
 import {createEngine,kindOf,BAD_KIND} from './engine.mjs'; import {createFake} from './fake-engine.mjs'; import {createQueue,MODELS,RATIOS,checkSpec} from './queue.mjs';
@@ -16,7 +17,7 @@ const hostOk=h=>h===`127.0.0.1:${PORT}`||h===`localhost:${PORT}`;
 const send=(res,code,body,type='application/json')=>{res.writeHead(code,{'content-type':type,'cache-control':'no-store'});res.end(typeof body==='string'||Buffer.isBuffer(body)?body:JSON.stringify(body));};
 const body=req=>new Promise((ok,no)=>{let b='';req.on('data',c=>{b+=c;if(b.length>1e6){req.destroy();no(new Error('too big'));}});req.on('end',()=>{try{ok(b?JSON.parse(b):{});}catch(e){no(e);}});});
 const view=()=>q.jobs().map(({generate_id,unique_key,...j})=>j);
-async function account(){const s=engine.status(); if(!s.connected)return {connected:false}; try{return {connected:true,...await engine.profile()};}catch(e){return {connected:true,error:String(e.message).slice(0,120)};}}
+async function account(){const s=engine.status(); if(!s.connected)return {connected:false}; const a=engine.active(); try{return {connected:true,id:a.id,...await engine.profile()};}catch(e){return {connected:true,id:a.id,nickname:a.nickname,error:String(e.message).slice(0,120)};}}
 
 let lastHit=Date.now();
 const server=http.createServer(async(req,res)=>{
@@ -31,7 +32,7 @@ const server=http.createServer(async(req,res)=>{
       if(p==='/api/update')return send(res,200,await checkUpdate());
       if(p==='/api/remote')return send(res,200,remoteStatus());
       if(p==='/api/assistants')return send(res,200,assistants(MCP_CMD).map(({add,...a})=>a));
-      if(p==='/api/state')return send(res,200,{dry:DRY,models:MODELS,ratios:RATIOS,account:await account(),jobs:view(),creditsUsed:q.creditsUsed(),out:OUT});
+      if(p==='/api/state')return send(res,200,{dry:DRY,models:MODELS,ratios:RATIOS,account:await account(),accounts:engine.accounts(),jobs:view(),creditsUsed:q.creditsUsed(),out:OUT});
       const m=p.match(/^\/api\/jobs\/(\w+)\/file\/(\d+)$/); // gallery playback; only paths recorded on a job are served
       if(m){const f=q.jobs().find(j=>j.id===m[1])?.files?.[+m[2]]; if(!f||!fs.existsSync(f))return send(res,404,{error:'no file'});
         const st=fs.statSync(f), r=(req.headers.range||'').match(/bytes=(\d*)-(\d*)/); let a=0,b=st.size-1,code=200; const h={'content-type':'video/mp4','accept-ranges':'bytes'};
@@ -59,9 +60,10 @@ const server=http.createServer(async(req,res)=>{
     if(p==='/api/remote')return send(res,200,b.on?await remoteOn(ROOT):remoteOff());
     if(p==='/api/open-folder'){fs.mkdirSync(OUT,{recursive:true}); execFile(process.platform==='win32'?'explorer':'open',[OUT],()=>{}); return send(res,200,{ok:true});}
     m=p.match(/^\/api\/assistants\/([\w-]+)$/); if(m){const a=assistants(MCP_CMD).find(a=>a.id===m[1]); if(!a)throw new Error('unknown assistant'); await a.add(); return send(res,200,{ok:true});}
-    if(p==='/api/connect/start')return send(res,200,{url:await engine.beginLogin()});
+    if(p==='/api/connect/start')return send(res,200,{url:await engine.beginLogin(b.reconnect)});
     if(p==='/api/connect/finish'){await engine.finishLogin(b.address);return send(res,200,{ok:true});}
-    if(p==='/api/disconnect'){engine.logout();return send(res,200,{ok:true});}
+    if(p==='/api/accounts/switch'){engine.switchAccount(b.account);return send(res,200,{ok:true});}
+    if(p==='/api/accounts/remove'){engine.removeAccount(b.account);return send(res,200,{ok:true});} // token only, history stays
     send(res,404,{error:'not found'});
   }catch(e){send(res,400,{error:String(e.message||e).slice(0,300)});}
 });
