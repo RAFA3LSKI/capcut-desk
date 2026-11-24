@@ -5,7 +5,7 @@ const NO_CREDITS='This account is out of credits.'; // mcp.mjs stays free of eng
 const DIR=process.env.DESK_DIR||path.join(os.homedir(),'.capcut-desk',process.env.DRY?'dry':''), compiled=/\$bunfs|~BUN/.test(import.meta.url), sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const alive=async()=>{try{const r=JSON.parse(fs.readFileSync(path.join(DIR,'run.json'),'utf8')); if((await fetch(`http://127.0.0.1:${r.port}/api/ping`)).ok)return r;}catch{} return null;};
 async function up(){let r=await alive(); if(r)return r;
-  spawn(process.execPath,compiled?[]:[fileURLToPath(new URL('./server.mjs',import.meta.url))],{detached:true,stdio:'ignore',env:{...process.env,NO_BROWSER:'1',DESK_IDLE_EXIT:'1'}}).unref();
+  spawn(process.execPath,compiled?[]:[fileURLToPath(new URL('./server.mjs',import.meta.url))],{detached:true,windowsHide:true,stdio:'ignore',env:{...process.env,NO_BROWSER:'1',DESK_IDLE_EXIT:'1'}}).unref();
   for(let i=0;i<40;i++){await sleep(250); if((r=await alive()))return r;}
   throw new Error('CapCut Desk did not start. Open the CapCut Desk app and try again.');}
 const api=async(p,b,raw)=>{const r=await up(), res=await fetch(`http://127.0.0.1:${r.port}${p}`,b===undefined?{}:{method:'POST',headers:{'x-desk-token':r.token,...(raw||{'content-type':'application/json'})},body:raw?b:JSON.stringify(b)}); const j=await res.json(); if(!res.ok)throw new Error(j.error||res.status); return j;};

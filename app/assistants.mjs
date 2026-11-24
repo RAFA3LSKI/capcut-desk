@@ -2,7 +2,8 @@
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import {execFile} from 'node:child_process';
 const H=os.homedir(), NAME='capcut-desk', win=process.platform==='win32';
 const find=n=>[...(process.env.PATH||'').split(path.delimiter),path.join(H,'.local/bin'),path.join(H,'.claude/local'),'/opt/homebrew/bin','/usr/local/bin',path.join(H,'.npm-global/bin'),path.join(H,'.bun/bin')].flatMap(d=>win?[path.join(d,n+'.cmd'),path.join(d,n+'.exe')]:[path.join(d,n)]).find(f=>{try{return fs.statSync(f).isFile();}catch{return false;}});
-const run=(f,a)=>new Promise((ok,no)=>execFile(f,a,{timeout:20000,shell:win},(e,o,er)=>e?no(new Error((er||o||e.message).trim().slice(0,200))):ok(o)));
+const q=s=>/[^\w./:-]/.test(s)?`"${s}"`:s; // shell:true on Windows joins args unquoted, so quote paths with spaces
+const run=(f,a)=>new Promise((ok,no)=>execFile(win?q(f):f,win?a.map(q):a,{timeout:20000,shell:win},(e,o,er)=>e?no(new Error((er||o||e.message).trim().slice(0,200))):ok(o)));
 const read=f=>{try{return fs.readFileSync(f,'utf8');}catch{return '';}}, sh=a=>a.map(s=>/[^\w./:-]/.test(s)?`"${s}"`:s).join(' ');
 const deskCfg=win?path.join(process.env.APPDATA||H,'Claude','claude_desktop_config.json'):path.join(H,'Library/Application Support/Claude/claude_desktop_config.json');
 export function assistants(cmd){ // cmd: [executable, ...args] that starts the MCP bridge
