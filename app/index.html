@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CapCut Desk</title>
+<style>
+/* Dark on purpose: people judge video here, and a dark room around the clip is how every video tool is used. One accent, used only for the main action and live state. */
+:root{color-scheme:dark;--bg:#131211;--panel:#1b1a18;--raise:#262422;--line:#34312d;--fg:#f3f0ea;--mute:#a8a298;--acc:#ff8a4c;--acc-ink:#1d0f06;--bad:#ff9288;--ok:#7bd88f;--blue:#7fb2ff;--violet:#b9a2ff;--teal:#5fd3c4;--side:232px;--tile:190px;--r:12px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scrollbar-color:var(--line) transparent}
+body{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh;margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;caret-color:var(--acc)}
+::selection{background:var(--acc);color:var(--acc-ink)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}button:disabled{cursor:default}
+p{margin:0}
+svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mute{color:var(--mute)}.bad{color:var(--bad)}
+.num{font-variant-numeric:tabular-nums}
+
+/* sidebar: the second neutral layer, with the one warm glow in the app */
+.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;padding:16px 12px;border-right:1px solid var(--line);background:radial-gradient(130% 50% at 0 0,rgb(255 138 76/.16),transparent 62%),var(--panel);overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:650;letter-spacing:-.01em;padding:2px 8px 14px}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center}
+.logo svg{fill:currentColor;stroke:none;width:12px;height:12px}
+.side h3{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:14px 8px 4px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border:0;border-radius:9px;background:none;text-align:left;color:var(--mute);transition:background .15s,color .15s}
+.nav:hover{background:rgb(255 255 255/.05);color:var(--fg)}
+.nav[aria-current=page]{background:rgb(255 138 76/.16);color:var(--fg)}
+.nav[aria-current=page] svg{color:var(--acc)}
+.nav .n{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--mute)}
+.nav .n.hot{background:var(--acc);color:var(--acc-ink);border-radius:999px;padding:0 7px;font-weight:600}
+.foot{margin-top:auto;display:grid;gap:8px;padding-top:14px}
+.meter{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:rgb(0 0 0/.25)}
+.meter b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;color:var(--acc)}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 8px;border:0;background:none;border-radius:9px;text-align:left;width:100%;min-width:0}
+.who:hover{background:rgb(255 255 255/.05)}
+.who span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mute);flex:none}.dot.on{background:var(--ok)}
+/* top bar of the main area */
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 24px;background:color-mix(in srgb,var(--bg) 92%,transparent);border-bottom:1px solid var(--line)}
+.bar h1{font-size:17px;font-weight:650;letter-spacing:-.01em;margin:0 auto 0 0}
+.bar input{width:220px;height:32px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:none;padding:0 10px;height:30px;font-size:12px;color:var(--mute)}
+.seg button[aria-pressed=true]{background:var(--raise);color:var(--fg)}
+#dry{display:none;background:#8a5200;color:#fff;text-align:center;padding:6px;font-weight:600;font-size:13px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--raise);white-space:nowrap;transition:background .15s,border-color .15s,opacity .15s}
+.btn:hover:not(:disabled){border-color:#55514a;background:#2e2c29}
+.btn.go{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:600}
+.btn.go:hover:not(:disabled){background:#ff9c68;border-color:#ff9c68}
+.btn.go:disabled{background:var(--raise);border-color:var(--line);color:var(--mute);font-weight:500}
+.btn.sm{padding:5px 9px;font-size:13px}
+.ico{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:0;background:rgb(0 0 0/.55);color:#fff;transition:background .15s}
+.ico:hover{background:rgb(0 0 0/.85)}
+
+/* feed */
+main{padding:20px 24px calc(var(--ch,190px) + 40px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:22px 14px;align-items:start}
+.day{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;margin-top:14px;font-size:13px}
+.day:first-child{margin-top:0}
+.day b{font-size:15px;font-weight:600}
+.day .cr{color:var(--acc)}
+.tag{display:inline-flex;align-items:center;gap:5px}.tag i{width:7px;height:7px;border-radius:50%;background:var(--c,var(--mute))}
+.tile{min-width:0;position:relative}
+.tile.wide{grid-column:span 2}
+.thumb{display:block;width:100%;padding:0;border:0;border-radius:var(--r);overflow:hidden;background:#000;position:relative}
+.thumb video{display:block;width:100%;height:100%;object-fit:cover}
+.thumb .len{position:absolute;left:8px;bottom:8px;padding:1px 6px;border-radius:6px;background:rgb(0 0 0/.6);color:#fff;font-size:12px}
+.acts{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.tile:hover .acts,.tile:focus-within .acts{opacity:1}
+.cap{padding:8px 2px 0}
+.cap .pr{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cap .meta{color:var(--mute);font-size:12px;margin-top:2px}
+.ph{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);font-size:13px;overflow:hidden;position:relative}
+.ph b{font-weight:600}
+.ph.live{border-color:#5a4030}
+.ph.live::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgb(255 138 76/.08) 50%,transparent 70%);background-size:220% 100%;animation:sheen 1.8s linear infinite}
+.ph>*{position:relative}
+@keyframes sheen{from{background-position:120% 0}to{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){.ph.live::before{animation:none}*{transition:none!important}}
+.ph .err{color:var(--bad);overflow-wrap:anywhere}
+.rowb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.off{opacity:.6}
+
+/* first run / empty */
+.hello{max-width:560px;margin:8vh auto 0;display:grid;gap:14px}
+.hello h2{font-size:26px;font-weight:650;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.hello ol{margin:0;padding-left:20px;color:var(--mute);display:grid;gap:4px}
+.hello input{width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+.eg{display:grid;gap:8px}
+.eg button{text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--fg);transition:border-color .15s}
+.eg button:hover{border-color:#55514a}
+#where{margin-top:28px;font-size:12px;color:var(--mute)}
+
+/* composer */
+.comp{position:fixed;z-index:6;left:calc(50% + var(--side)/2);bottom:16px;transform:translateX(-50%);width:min(900px,calc(100vw - var(--side) - 40px));background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 18px 50px -10px rgb(0 0 0/.75);transition:border-color .15s}
+.comp:focus-within{border-color:#55514a}
+.comp.drop{border-color:var(--acc)}
+.comp textarea{display:block;width:100%;border:0;outline:0;background:none;resize:none;font-size:15px;line-height:1.5;padding:4px 6px 10px;max-height:38vh}
+.comp textarea::placeholder{color:#8d877d}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{height:32px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--raise);font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:border-color .15s}
+.chip:hover{border-color:#55514a}
+select.chip{appearance:none;-webkit-appearance:none;padding-right:26px;background:var(--raise) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23a8a298' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 9px center}
+.chip input{width:26px;border:0;outline:0;background:none;text-align:right;padding:0;-moz-appearance:textfield}
+.chip input::-webkit-inner-spin-button{display:none}
+.chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
+input.chip{width:150px}
+.ctl .end{margin-left:auto;display:flex;align-items:center;gap:10px}
+#quote{font-size:13px;color:var(--mute);text-align:right}
+#msg{font-size:13px;margin-top:8px}#msg:empty{display:none}
+.refs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.refs:empty{display:none}
+.ref{position:relative;width:76px;font-size:11px}
+.ref .pic{width:76px;height:76px;border-radius:10px;border:1px solid var(--line);background:var(--raise) center/cover;display:grid;place-items:center;color:var(--mute);padding:4px;text-align:center;overflow:hidden;overflow-wrap:anywhere;line-height:1.2}
+.ref .ico{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#000;border:1px solid var(--line)}
+.ref .ico svg{width:12px;height:12px}
+.ref select{width:100%;margin-top:4px;font-size:11px;background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:2px}
+.ref.busy .pic{opacity:.5}
+
+/* panels: usage, assistants, account */
+.page{max-width:860px;display:grid;gap:18px}
+.page>p{max-width:65ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat,.panel{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:14px 16px}
+.stat span{font-size:12px;color:var(--mute)}.stat b{display:block;font-size:24px;font-weight:650;letter-spacing:-.02em}
+.panel h2{font-size:14px;margin:0 0 10px;font-weight:600}
+.bars{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center;font-size:13px}
+.bars .b{height:8px;border-radius:4px;background:var(--c,var(--acc));min-width:2px}
+.asst{display:grid;gap:10px}
+.asst .hd{display:flex;align-items:center;gap:10px}.asst .hd b{font-size:15px}.asst .hd .btn{margin-left:auto}
+.pill{font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+pre{margin:0;padding:10px 12px;border-radius:9px;background:#0c0b0a;border:1px solid var(--line);font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.say{display:grid;gap:6px;padding-left:18px;margin:0;color:var(--mute)}
+@media(max-width:760px){:root{--side:64px}.brand span,.nav span,.side h3,.foot{display:none}.bar input{width:120px}}
+
+/* viewer */
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--fg);padding:0;max-width:min(1000px,94vw);max-height:92vh;box-shadow:0 30px 80px -10px #000}
+dialog::backdrop{background:rgb(0 0 0/.7)}
+.view{display:flex;flex-wrap:wrap}
+.view video{display:block;max-height:92vh;max-width:min(560px,94vw);background:#000}
+.view aside{flex:1 1 280px;max-width:380px;padding:20px;display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto}
+.view h2{font-size:16px;margin:0;font-weight:600;overflow-wrap:anywhere}
+.view .full{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.view dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:13px}.view dt{color:var(--mute)}.view dd{margin:0}
+.view .rowb{margin-top:auto;padding-top:8px}
+</style></head><body>
+<aside class="side">
+  <div class="brand"><i class="logo"><svg viewBox="0 0 12 12"><path d="M3 1.5v9l8-4.5z"/></svg></i><span>CapCut Desk</span></div>
+  <button class="nav" data-v="create"><svg viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11"/></svg><span>Create</span><i class="n" id="n-all"></i></button>
+  <h3>Library</h3>
+  <button class="nav" data-v="progress"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg><span>In progress</span><i class="n" id="n-prog"></i></button>
+  <button class="nav" data-v="done"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M6.5 6v4l3.5-2z"/></svg><span>Finished clips</span><i class="n" id="n-done"></i></button>
+  <button class="nav" data-v="failed"><svg viewBox="0 0 16 16"><path d="M8 2.5l6 10.5H2z"/><path d="M8 6.5v3M8 11.3v.2"/></svg><span>Failed &amp; cancelled</span><i class="n" id="n-fail"></i></button>
+  <h3>Workspace</h3>
+  <button class="nav" data-v="usage"><svg viewBox="0 0 16 16"><path d="M3 13V8M8 13V3M13 13V6"/></svg><span>Credit usage</span></button>
+  <button class="nav" data-v="assist"><svg viewBox="0 0 16 16"><path d="M8 2l1.4 3.6L13 7l-3.6 1.4L8 12 6.6 8.4 3 7l3.6-1.4z"/><path d="M12.5 11.5v3M11 13h3"/></svg><span>AI assistants</span></button>
+  <button class="nav" data-v="account"><svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.7"/><path d="M2.8 13.5a5.2 5.2 0 0 1 10.4 0"/></svg><span>Account</span></button>
+  <div class="foot"><div class="meter"><b id="used" class="num">0</b><span class="mute" id="usedsub">credits used</span></div>
+    <button class="who" data-v="account"><span class="dot" id="dot"></span><span id="acctname">Loading…</span></button></div>
+</aside>
+<div>
+<div id="dry">DRY MODE — nothing is charged</div>
+<div id="upd" hidden style="background:var(--panel);border-bottom:1px solid var(--line);padding:8px 16px;font-size:13px"></div>
+<header class="bar"><h1 id="vtitle">Create</h1>
+  <input id="find" type="search" placeholder="Search prompts" aria-label="Search prompts">
+  <div class="seg" id="size" role="group" aria-label="Tile size"><button data-s="150">S</button><button data-s="190" aria-pressed="true">M</button><button data-s="270">L</button></div>
+</header>
+<main>
+  <section id="v-feed">
+    <div id="gal" class="grid" aria-live="polite"></div>
+    <p id="where"></p>
+  </section>
+  <section id="v-usage" class="page" hidden></section>
+  <section id="v-assist" class="page" hidden>
+    <p class="mute">Let Claude or Codex make videos for you through this app. Add it once, then just ask in a chat. The assistant sees prices first and uses the same queue and the same credits as this window.</p>
+    <div id="asstlist" style="display:grid;gap:12px"></div>
+    <div class="panel asst" id="remote"></div>
+    <div class="panel"><h2>Things you can say</h2><ul class="say"><li>“Use CapCut Desk to make a 5 second vertical video of a cat on a windowsill. Tell me the price first.”</li><li>“Make these 4 prompts with Seedance 2.5 at 720p and tell me where the files are.”</li><li>“Animate this image: /Users/me/Pictures/product.png, slow push in, 6 seconds.”</li></ul></div>
+  </section>
+  <section id="v-account" class="page" hidden>
+    <div class="panel"><h2>CapCut account</h2><p id="acctline"></p>
+      <div class="rowb"><button id="conn" class="btn go">Connect CapCut</button><button id="disc" class="btn" hidden>Disconnect this account</button></div>
+      <div id="connbox" class="hello" hidden style="margin:14px 0 0;max-width:none">
+        <ol><li><a id="connlink" target="_blank" rel="noopener" style="color:var(--acc)">Open the CapCut approval page</a>, sign in with the email and password of your account, and approve. This window connects by itself.</li>
+        <li>Approving on another device? Copy this link there: <input id="linktext" readonly aria-label="Approval link"></li>
+        <li>The page it ends on will not load on that device. Paste its address here:</li></ol>
+        <div style="display:flex;gap:8px"><input id="addr" placeholder="http://127.0.0.1:38917/callback?code=…" aria-label="Callback address"><button id="fin" class="btn">Finish</button></div>
+      </div></div>
+    <div class="panel"><h2>Where clips are saved</h2><p id="outline" class="mute" style="overflow-wrap:anywhere"></p><div class="rowb"><button class="btn" data-a="openout">Open folder</button></div></div>
+    <div class="panel"><h2>Good to know</h2><ul class="say"><li>Videos use the credits of the connected CapCut account. The price is on the Generate button before anything is charged.</li><li>Videos are made one at a time. You can queue as many as you like.</li><li>If a download fails, Retry fetches the same video again without a new charge.</li><li>Results carry CapCut's “Ai” label. Leave it on.</li></ul></div>
+  </section>
+</main>
+</div>
+
+<form class="comp" id="comp" autocomplete="off">
+  <div id="reflist" class="refs"></div>
+  <textarea id="prompts" rows="1" placeholder="Describe the video. One line = one video." aria-label="Prompts, one per line"></textarea>
+  <div class="ctl">
+    <button type="button" class="chip" id="attach" title="Add reference images, video or audio (or drop files here)"><svg viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="11" rx="2"/><circle cx="5.8" cy="6.2" r="1.1"/><path d="M2.5 11.5l3.5-3 2.5 2 2-1.5 3 2.5"/></svg>Reference</button>
+    <input id="reffile" type="file" multiple accept="image/*,video/*,audio/*" hidden>
+    <select id="model" class="chip" aria-label="Model" title="Model"></select>
+    <select id="res" class="chip" aria-label="Resolution" title="Resolution"></select>
+    <select id="ratio" class="chip" aria-label="Aspect ratio" title="Aspect ratio"></select>
+    <label class="chip" title="Length in seconds"><input id="secs" type="number" step="1" aria-label="Length in seconds"><span class="mute">sec</span></label>
+    <select id="count" class="chip" aria-label="Takes per prompt" title="Takes per prompt"><option value="1">1 take</option><option value="2">2 takes</option><option value="3">3 takes</option><option value="4">4 takes</option></select>
+    <input id="name" class="chip" placeholder="Name (optional)" aria-label="Name">
+    <div class="end"><span id="quote" class="num" role="status"></span><button id="queue" class="btn go" disabled title="Cmd+Enter">Generate</button></div>
+  </div>
+  <div id="msg" class="bad" role="alert"></div>
+</form>
+
+<dialog id="view"><div class="view"><video id="vvid" controls loop playsinline></video>
+  <aside><h2 id="vname"></h2><p id="vprompt" class="full"></p><dl id="vmeta"></dl>
+  <div class="rowb"><button class="btn go" data-a="again">Use these settings</button><button class="btn" data-a="copy">Copy prompt</button><button class="btn" data-a="folder">Show file</button><button class="btn" id="vclose">Close</button></div></aside></div></dialog>
+
+<script>
+const TOKEN='__TOKEN__', $=id=>document.getElementById(id); let S=null, Q=null, REFS=[], TH=[], LAST='', VIEW=null, V='create'; // REFS: uploaded reference_assets, TH: their local thumbnails // S state, Q {per,key}
+const api=async(p,b)=>{const r=await fetch(p,b?{method:'POST',headers:{'x-desk-token':TOKEN,'content-type':'application/json'},body:JSON.stringify(b)}:{});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j;};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const I={again:'<path d="M3 8a5 5 0 1 0 1.6-3.7"/><path d="M3 2.5v3h3"/>',copy:'<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/>',folder:'<path d="M2 4.5a1 1 0 0 1 1-1h3l1.5 1.5H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>',x:'<path d="M4 4l8 8M12 4l-8 8"/>'};
+const ico=(n,a,id,label,extra='')=>`<button type="button" class="ico" data-a="${a}" data-id="${id}" ${extra} title="${label}" aria-label="${label}"><svg viewBox="0 0 16 16">${I[n]}</svg></button>`;
+const NICE={'seedance2.5':'Seedance 2.5','seedance2':'Seedance 2','seedance2_fast':'Seedance 2 Fast','seedance2_mini':'Seedance 2 Mini','seedance1_fast':'Seedance 1 Fast'}, nice=m=>NICE[m]||m;
+const HUE={'seedance2.5':'var(--acc)','seedance2':'var(--blue)','seedance2_fast':'var(--teal)','seedance2_mini':'var(--violet)','seedance1_fast':'var(--ok)'}, tag=m=>`<span class="tag" style="--c:${HUE[m]||'var(--mute)'}"><i></i>${nice(m)}</span>`;
+const TITLE={create:'Create',progress:'In progress',done:'Finished clips',failed:'Failed & cancelled',usage:'Credit usage',assist:'AI assistants',account:'Account'}, FEED=['create','progress','done','failed'];
+const LABEL={queued:'Waiting in line',running:'Making it…',needs_approval:'Needs your OK',failed:'Failed',cancelled:'Cancelled'};
+const hidden=()=>{try{return JSON.parse(localStorage.hid||'[]');}catch{return [];}};
+const say=(t,bad=true)=>{$('msg').className=bad?'bad':'mute';$('msg').textContent=t; if(!bad)setTimeout(()=>{if($('msg').textContent===t)$('msg').textContent='';},2500);};
+const prompts=()=>$('prompts').value.split('\n').map(s=>s.trim()).filter(Boolean);
+const spec=()=>({model:$('model').value,resolution:$('res').value,ratio:$('ratio').value,duration_ms:Math.round(+$('secs').value*1000),count:+$('count').value,...(REFS.length?{reference_assets:REFS}:{})});
+const wide=j=>{const m=/^(\d+):(\d+)$/.exec(j.spec.ratio);return m&&+m[1]>+m[2]?' wide':'';};
+const ar=r=>/^\d+:\d+$/.test(r)?`aspect-ratio:${r.replace(':','/')}`:'aspect-ratio:9/16';
+const meta=j=>`${tag(j.spec.model)} · ${j.spec.resolution} · ${j.spec.duration_ms/1000}s`;
+function grow(){const t=$('prompts');t.style.height='auto';t.style.height=Math.min(t.scrollHeight,innerHeight*.38)+'px';}
+function fillModel(){ // the form follows the one MODELS table from the server
+  const m=S.models[$('model').value]; $('res').innerHTML=m.res.map(r=>`<option>${r}</option>`).join('');
+  $('res').value=m.res.includes('720p')?'720p':m.res[0]; const s=$('secs'); s.min=m.dur[0]; s.max=m.dur[1]; s.parentNode.title=`Length in seconds (${m.dur[0]}–${m.dur[1]})`;
+  if(!(+s.value>=m.dur[0]&&+s.value<=m.dur[1]))s.value=Math.max(m.dur[0],Math.min(5,m.dur[1]));}
+// The price sits on the button itself, so nothing is queued without seeing it.
+let qt; function wantQuote(){Q=null;const b=$('queue');b.disabled=true;b.textContent='Generate';clearTimeout(qt);const n=prompts().length;
+  if(!n){$('quote').textContent='';return;} $('quote').textContent='Getting the price…';
+  qt=setTimeout(async()=>{const key=JSON.stringify([spec(),n]);try{const r=await api('/api/quote',{spec:{...spec(),prompt:prompts()[0]}});if(key!==JSON.stringify([spec(),prompts().length]))return;
+    Q={per:r.credits,key}; b.textContent=`Generate${n>1?` ${n} videos`:''} · ${r.credits*n} credits`; b.disabled=!S.account.connected;
+    $('quote').innerHTML=(n>1?`${r.credits} each`:'')+(r.insufficient?' <span class="bad">This account may not have enough credits.</span>':'')+(S.account.connected?'':' <span class="bad">Connect an account first.</span>');
+  }catch(e){$('quote').innerHTML='<span class="bad">'+esc(e.message)+'</span>';}},400);}
+function showRefs(){$('reflist').innerHTML=REFS.map((a,i)=>`<div class="ref"><div class="pic" ${TH[i]?`style="background-image:url(${TH[i]})"`:''} title="${esc(a.file_name)}">${TH[i]?'':esc(a.file_name)}</div>${ico('x','unref',i,'Remove '+esc(a.file_name))}${a.media_type==='image'?`<select data-r="${i}" aria-label="Role of ${esc(a.file_name)}"><option value="reference">Reference</option><option value="first_frame"${a.role==='first_frame'?' selected':''}>First frame</option><option value="last_frame"${a.role==='last_frame'?' selected':''}>Last frame</option></select>`:`<div class="mute">${esc(a.media_type)}</div>`}</div>`).join('');}
+async function addFiles(files){const bad=[]; for(const f of files){say(`Uploading ${f.name}…`,false);
+    try{const r=await fetch('/api/upload',{method:'POST',headers:{'x-desk-token':TOKEN,'x-file-name':encodeURIComponent(f.name)},body:f});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);REFS.push(j);TH.push(f.type.startsWith('image/')?URL.createObjectURL(f):'');showRefs();}catch(err){bad.push(`${f.name}: ${err.message}`);}}
+  say(bad.join(' | ')); wantQuote();}
+function tile(j){
+  if(j.status==='done')return (j.files||[]).map((f,i)=>`<article class="tile${wide(j)}"><button type="button" class="thumb" data-a="view" data-id="${j.id}" data-i="${i}" style="${ar(j.spec.ratio)}" aria-label="Open ${esc(j.name)}"><video muted loop playsinline preload="auto" src="/api/jobs/${j.id}/file/${i}"></video><span class="len num">${j.spec.duration_ms/1000}s</span></button><div class="acts">${ico('again','again',j.id,'Use these settings')}${ico('copy','copy',j.id,'Copy prompt')}${ico('folder','folder',j.id,'Show file')}</div><div class="cap"><p class="pr" title="${esc(j.spec.prompt)}">${esc(j.spec.prompt)}</p><p class="meta num">${tag(j.spec.model)} · ${j.spec.resolution} · ${j.credits??'?'} credits${j.spec.count>1?' for '+j.spec.count:''}</p></div></article>`).join('');
+  const live=j.status==='queued'||j.status==='running', act=live||j.status==='needs_approval';
+  return `<article class="tile${wide(j)}${act?'':' off'}"><div class="ph${live?' live':''}" style="${ar(j.spec.ratio)}"><b class="${j.status==='failed'||j.status==='needs_approval'?'bad':''}">${LABEL[j.status]||j.status}</b>${live?`<span class="mute num" data-since="${esc(j.createdAt||'')}"></span>`:''}${j.error?`<span class="err">${esc(j.error)}</span>`:''}${j.status==='needs_approval'?`<span>CapCut now asks ${j.quoted} credits. You approved up to ${j.ceiling}.</span>`:''}
+    <div class="rowb">${j.status==='needs_approval'?`<button class="btn sm go" data-a="approve" data-id="${j.id}" data-c="${j.quoted}">Approve ${j.quoted} credits</button>`:''}${act?`<button class="btn sm" data-a="cancel" data-id="${j.id}">Cancel</button>`:`${j.status==='failed'&&j.task_id?`<button class="btn sm go" data-a="retry" data-id="${j.id}">Retry, no new charge</button>`:''}<button class="btn sm" data-a="again" data-id="${j.id}">Use settings</button><button class="btn sm" data-a="hide" data-id="${j.id}">Hide</button>`}</div></div>
+    <div class="cap"><p class="pr" title="${esc(j.spec.prompt)}">${esc(j.spec.prompt)}</p><p class="meta num">${meta(j)}${j.quoted!=null&&act?` · ${j.quoted} credits`:''}</p></div></article>`;}
+const dayOf=j=>{const t=j.finishedAt||j.createdAt; if(!t)return 'Earlier'; const d=new Date(t), n=new Date(), y=new Date(n-864e5); return d.toDateString()===n.toDateString()?'Today':d.toDateString()===y.toDateString()?'Yesterday':d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:d.getFullYear()===n.getFullYear()?undefined:'numeric'});};
+async function refresh(){
+  S=await api('/api/state'); const a=S.account, hid=hidden();
+  $('dry').style.display=S.dry?'block':'none';
+  $('dot').className='dot'+(a.connected&&!a.error?' on':''); $('acctname').textContent=a.connected?(a.nickname||'Connected'):'Not connected';
+  $('acctline').innerHTML=a.connected?`Connected as <b>${esc(a.nickname||'(name unavailable)')}</b>${a.error?`<br><span class="bad">${esc(a.error)}</span>`:''}`:'No CapCut account connected yet.';
+  $('outline').textContent=S.out; $('disc').hidden=!a.connected; $('conn').hidden=a.connected&&!a.error; if(a.connected&&!a.error)$('connbox').hidden=true; // sign-in expired: Connect stays one click away
+  const today=S.jobs.filter(j=>j.status==='done'&&dayOf(j)==='Today').reduce((s,j)=>s+(+j.credits||0),0);
+  $('used').textContent=S.creditsUsed; $('usedsub').textContent=`credits used${today?` · ${today} today`:''}`;
+  if(!$('model').options.length){$('model').innerHTML=Object.keys(S.models).map(m=>`<option value="${m}">${nice(m)}</option>`).join('');$('model').value='seedance2_mini';$('ratio').innerHTML=S.ratios.map(r=>`<option>${r}</option>`).join('');$('ratio').value='9:16';fillModel();}
+  const isAct=j=>['queued','running','needs_approval'].includes(j.status), all=[...S.jobs].reverse().filter(j=>!hid.includes(j.id)), nA=all.filter(isAct).length, nD=all.filter(j=>j.status==='done').length, nF=all.length-nA-nD;
+  $('n-prog').textContent=nA||''; $('n-prog').className='n'+(nA?' hot':''); $('n-done').textContent=nD||''; $('n-fail').textContent=nF||''; $('n-all').textContent='';
+  if(V==='usage')usage();
+  const find=$('find').value.trim().toLowerCase(), jobs=all.filter(j=>(V==='progress'?isAct(j):V==='done'?j.status==='done':V==='failed'?!isAct(j)&&j.status!=='done':true)&&(!find||(j.spec.prompt+' '+j.name).toLowerCase().includes(find))), act=jobs.filter(isAct), rest=jobs.filter(j=>!isAct(j));
+  let h=act.length?`<div class="day"><b>In progress</b><span class="mute">${act.length} ${act.length>1?'videos, made one at a time':'video'}</span></div>`+act.reverse().map(tile).join(''):'', day='';
+  for(const j of rest){const d=dayOf(j); if(d!==day){day=d; const same=rest.filter(x=>dayOf(x)===d&&x.status==='done'), cr=same.reduce((s,x)=>s+(+x.credits||0),0), n=same.reduce((s,x)=>s+(x.files||[]).length,0); h+=`<div class="day"><b>${d}</b><span class="mute num">${n} clip${n===1?'':'s'}${cr?` · <span class="cr">${cr} credits</span>`:''}</span></div>`;} h+=tile(j);}
+  if(!a.connected&&V==='create')h=`<div class="hello" style="grid-column:1/-1"><h2>Connect your CapCut account to start</h2><p class="mute">Videos are made with that account's own credits. You see the price before anything is charged.</p><div><button type="button" class="btn go" data-v="account">Connect CapCut</button></div></div>`+h;
+  else if(!jobs.length)h=V==='create'&&!find?`<div class="hello" style="grid-column:1/-1"><h2>Describe a video below</h2><p class="mute">Each line becomes its own video. The price shows on the button before anything is charged, and finished clips land here.</p><div class="eg">${['A ginger cat on a sunny windowsill slowly blinks at the camera, soft morning light, handheld phone video','Slow push in on a steaming cup of coffee on a wooden table, rain on the window behind it','A paper boat drifts down a gutter stream after rain, low camera following it'].map(p=>`<button type="button" data-a="eg">${esc(p)}</button>`).join('')}</div></div>`:`<p class="mute" style="grid-column:1/-1">${find?'No clips match that search.':V==='progress'?'Nothing is being made right now.':V==='failed'?'No failed or cancelled videos.':'No finished clips yet.'}</p>`;
+  if(h!==LAST){$('gal').innerHTML=LAST=h; tick();} // redraw only on change, so a playing clip is not restarted every poll
+  $('where').textContent=rest.length?'Clips are saved in '+S.out:'';
+}
+function go(v){V=v; for(const b of document.querySelectorAll('.nav'))b.toggleAttribute('aria-current',false),b.dataset.v===v&&b.setAttribute('aria-current','page');
+  const feed=FEED.includes(v); $('vtitle').textContent=TITLE[v]; $('v-feed').hidden=!feed; $('comp').hidden=!feed; $('find').hidden=$('size').hidden=!feed;
+  for(const x of ['usage','assist','account'])$('v-'+x).hidden=v!==x; if(v==='assist')assist(); scrollTo(0,0); refresh().catch(()=>{});}
+function usage(){const done=S.jobs.filter(j=>j.status==='done'), sum=a=>a.reduce((s,j)=>s+(+j.credits||0),0), clips=done.reduce((s,j)=>s+(j.files||[]).length,0), by=f=>{const m=new Map(); for(const j of [...done].reverse())m.set(f(j),[...(m.get(f(j))||[]),j]); return [...m];}, max=Math.max(1,...by(dayOf).map(r=>sum(r[1])),...by(j=>j.spec.model).map(r=>sum(r[1])));
+  const rows=(l,c)=>l.length?`<div class="bars">${l.map(([k,js])=>`<span>${c?tag(k):esc(k)}</span><span class="b" style="width:${Math.max(1,sum(js)/max*100)}%;${c?`--c:${HUE[k]||'var(--mute)'}`:''}"></span><span class="num">${sum(js)} credits · ${(n=>n+(n===1?' clip':' clips'))(js.reduce((s,j)=>s+(j.files||[]).length,0))}</span>`).join('')}</div>`:'<p class="mute">Nothing yet.</p>';
+  $('v-usage').innerHTML=`<div class="stats"><div class="stat"><span>Credits used in this app</span><b class="num" style="color:var(--acc)">${S.creditsUsed}</b></div><div class="stat"><span>Today</span><b class="num">${sum(done.filter(j=>dayOf(j)==='Today'))}</b></div><div class="stat"><span>Clips made</span><b class="num">${clips}</b></div><div class="stat"><span>Average per clip</span><b class="num">${clips?Math.round(sum(done)/clips):0}</b></div></div><div class="panel"><h2>By day</h2>${rows(by(dayOf))}</div><div class="panel"><h2>By model</h2>${rows(by(j=>j.spec.model),1)}</div><p class="mute">CapCut does not share the account's remaining balance with apps, so this counts what was spent here. The price check warns when the account may not have enough.</p>`;}
+async function remote(r){try{r=r||await api('/api/remote');}catch(e){r={error:e.message};}
+  $('remote').innerHTML=`<div class="hd"><b>Claude or ChatGPT in a browser or on a phone</b><span class="pill${r.on?' ok':''}">${r.on?'Link is on':'Off'}</span><button class="btn${r.on?'':' go'}" data-a="${r.on?'remoteoff':'remoteon'}">${r.on?'Turn off':'Turn on remote link'}</button></div>
+  <p class="mute">Experimental. Gives this app a private internet address so an assistant that runs online can use it. This computer must stay on with the app open, and you get a new address every time you turn the link on.</p>${r.error?`<p class="bad">${esc(r.error)}</p>`:''}
+  ${r.on?`<pre id="rurl">${esc(r.url)}</pre><div class="rowb" style="margin:0"><button class="btn sm" data-a="copyurl">Copy address</button></div>
+  <ul class="say"><li><b>Claude:</b> claude.ai, Settings, Connectors, Add custom connector. Paste the address, then start a new chat.</li><li><b>ChatGPT:</b> Settings, Connectors (developer mode), add a connector with this address and no authentication.</li></ul>
+  <p class="bad">Keep this address private. Anyone who has it can make videos with your credits while the link is on. Reference images are not available over the link.</p>`:''}`;}
+async function assist(){remote();try{const l=await api('/api/assistants'); $('asstlist').innerHTML=l.map(a=>`<div class="panel asst"><div class="hd"><b>${esc(a.name)}</b><span class="pill${a.added?' ok':''}">${a.added?'Added':a.found?'Not added yet':'Not found on this computer'}</span><button class="btn${a.added?'':' go'}" data-a="addasst" data-id="${a.id}">${a.added?'Add again':'Add CapCut Desk'}</button></div><p class="mute">${esc(a.note)} If you move this app to another folder, add it again.</p><details><summary class="mute" style="cursor:pointer">Do it by hand</summary><pre>${esc(a.manual)}</pre></details></div>`).join('');}catch(e){$('asstlist').innerHTML=`<p class="bad">${esc(e.message)}</p>`;}}
+function tick(){for(const e of document.querySelectorAll('[data-since]')){const s=Math.max(0,Math.floor((Date.now()-new Date(e.dataset.since))/1000)); e.textContent=isNaN(s)?'':`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}}
+function copy(t){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();say('Prompt copied.',false);}
+function reuse(j){if(!FEED.includes(V))go('create');$('prompts').value=j.spec.prompt;$('model').value=j.spec.model;fillModel();$('res').value=j.spec.resolution;$('ratio').value=j.spec.ratio;$('secs').value=j.spec.duration_ms/1000;$('count').value=j.spec.count;$('name').value=j.name;REFS=[...(j.spec.reference_assets||[])];TH=REFS.map(()=>'');showRefs();grow();wantQuote();$('view').close();$('prompts').focus();}
+function openView(j,i){VIEW=j; $('vvid').src=`/api/jobs/${j.id}/file/${i}`; $('vname').textContent=j.name; $('vprompt').textContent=j.spec.prompt;
+  $('vmeta').innerHTML=[['Model',nice(j.spec.model)],['Size',`${j.spec.resolution} · ${j.spec.ratio}`],['Length',j.spec.duration_ms/1000+' s'],['Charged',`${j.credits??'?'} credits${j.spec.count>1?' for '+j.spec.count+' takes':''}`],['Made',j.finishedAt?new Date(j.finishedAt).toLocaleString():'']].filter(r=>r[1]).map(r=>`<dt>${r[0]}</dt><dd class="num">${esc(r[1])}</dd>`).join('');
+  $('view').showModal(); $('vvid').play().catch(()=>{});}
+$('view').addEventListener('close',()=>{$('vvid').pause();$('vvid').removeAttribute('src');VIEW=null;});
+$('view').onclick=e=>{if(e.target===$('view'))$('view').close();}; $('vclose').onclick=()=>$('view').close();
+document.addEventListener('click',async e=>{const nv=e.target.closest('[data-v]'); if(nv)return go(nv.dataset.v); const sz=e.target.closest('#size button'); if(sz){for(const x of $('size').children)x.setAttribute('aria-pressed',x===sz);document.documentElement.style.setProperty('--tile',sz.dataset.s+'px');return;}
+  const b=e.target.closest('[data-a]'); if(!b)return; const a=b.dataset.a, id=b.dataset.id, j=VIEW&&!id?VIEW:S.jobs.find(x=>x.id===id);
+  try{ if(a==='cancel')await api(`/api/jobs/${id}/cancel`,{}); else if(a==='retry')await api(`/api/jobs/${id}/retry`,{}); else if(a==='approve')await api(`/api/jobs/${id}/approve`,{ceiling:+b.dataset.c});
+    else if(a==='folder')await api(`/api/jobs/${j.id}/folder`,{}); else if(a==='again')reuse(j); else if(a==='copy')copy(j.spec.prompt); else if(a==='view')return openView(j,+b.dataset.i);
+    else if(a==='hide')localStorage.hid=JSON.stringify([...hidden(),id]); else if(a==='unref'){REFS.splice(+id,1);TH.splice(+id,1);showRefs();wantQuote();return;}
+    else if(a==='openout'){await api('/api/open-folder',{});return;} else if(a==='addasst'){b.disabled=true;b.textContent='Adding…';try{await api('/api/assistants/'+id,{});}catch(err){alert(err.message);} return assist();}
+    else if(a==='remoteon'||a==='remoteoff'){b.disabled=true;b.textContent=a==='remoteon'?'Starting, about 15 seconds…':'Stopping…';return remote(await api('/api/remote',{on:a==='remoteon'}));} else if(a==='copyurl'){const t=document.createElement('textarea');t.value=$('rurl').textContent;document.body.append(t);t.select();document.execCommand('copy');t.remove();b.textContent='Copied';return;}
+    else if(a==='eg'){$('prompts').value=b.textContent;grow();wantQuote();$('prompts').focus();return;}
+    refresh();}catch(err){say(err.message);}});
+// WebKit paints no still frame until a clip has been seeked, so nudge each one once it has data. ponytail: preloads every clip; lazy-load by viewport if galleries get into the hundreds
+$('gal').addEventListener('loadeddata',e=>{if(e.target.tagName==='VIDEO'&&e.target.paused)e.target.currentTime=0.1;},true);
+// hover a clip to preview it
+$('gal').addEventListener('mouseover',e=>{const v=e.target.closest('.thumb')?.querySelector('video'); if(v&&v.paused)v.play().catch(()=>{});});
+$('gal').addEventListener('mouseout',e=>{const t=e.target.closest('.thumb'); if(t&&!t.contains(e.relatedTarget)){const v=t.querySelector('video'); if(v){v.pause();v.currentTime=0.1;}}});
+$('reflist').onchange=e=>{const i=e.target.dataset.r; if(i!=null){REFS[i]={...REFS[i],role:e.target.value};wantQuote();}};
+$('attach').onclick=()=>$('reffile').click();
+$('reffile').onchange=e=>{const f=[...e.target.files]; e.target.value=''; addFiles(f);};
+addEventListener('dragover',e=>{if([...e.dataTransfer.types].includes('Files')){e.preventDefault();$('comp').classList.add('drop');}});
+addEventListener('dragleave',e=>{if(!e.relatedTarget)$('comp').classList.remove('drop');});
+addEventListener('drop',e=>{if(e.dataTransfer.files.length){e.preventDefault();$('comp').classList.remove('drop');addFiles([...e.dataTransfer.files]);}});
+$('prompts').addEventListener('paste',e=>{const f=[...e.clipboardData.files]; if(f.length){e.preventDefault();addFiles(f);}});
+$('model').onchange=()=>{fillModel();wantQuote();}; for(const i of ['res','ratio','secs','count'])$(i).oninput=wantQuote; $('prompts').oninput=()=>{grow();wantQuote();};
+$('prompts').onkeydown=e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();$('comp').requestSubmit();}};
+$('comp').onsubmit=async e=>{e.preventDefault(); if(!Q||$('queue').disabled)return; say('');try{await api('/api/jobs',{prompts:prompts(),spec:spec(),name:$('name').value,ceiling:Q.per});$('prompts').value='';$('name').value='';REFS=[];TH=[];showRefs();grow();wantQuote();await refresh();scrollTo({top:0,behavior:'smooth'});}catch(err){say(err.message);}};
+$('conn').onclick=async()=>{try{const {url}=await api('/api/connect/start',{});$('connlink').href=url;$('linktext').value=url;$('connbox').hidden=false;}catch(e){say(e.message);}};
+$('fin').onclick=async()=>{try{await api('/api/connect/finish',{address:$('addr').value});$('connbox').hidden=true;refresh();}catch(e){say(e.message);}};
+$('disc').onclick=async()=>{if(confirm('Disconnect this CapCut account?')){await api('/api/disconnect',{});refresh();}};
+$('find').oninput=()=>refresh().catch(()=>{});
+new ResizeObserver(()=>document.documentElement.style.setProperty('--ch',$('comp').offsetHeight+'px')).observe($('comp'));
+api('/api/update').then(u=>{if(u.update){$('upd').hidden=false;$('upd').innerHTML=`New version <b>${esc(u.latest)}</b> is available (you have ${esc(u.current)}). <a href="${esc(u.url)}" target="_blank" rel="noopener">Download it</a>, then replace the app. Your account and clips stay.`;}}).catch(()=>{});
+go('create'); setInterval(()=>refresh().catch(()=>{}),4000); setInterval(tick,1000);
+</script></body></html>

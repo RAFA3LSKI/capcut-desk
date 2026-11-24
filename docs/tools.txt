@@ -1,0 +1,38 @@
+auto_caption_query :: Desktop only. Check progress and retrieve captions after submitting an automatic caption task.
+auto_caption_submit :: Desktop only. Recognize speech in video or audio for transcription, subtitle files, or automatic captions. Use
+background_music :: Displays music produced or selected during an edit. Use it when the editing task provides music to show.
+billing_confirmation :: Show the quoted credit cost and request approval when image or video generation requires credit confirmation. 
+capcut_ailab_get_plan_response_state :: Checks whether one exact editing-plan card already has a successfully submitted response. This tool is used on
+capcut_ailab_poll_edit_progress :: Checks an editing task for newly available messages, decisions, progress, and results. Use it after starting o
+capcut_ailab_start_edit :: Creates an AI rough cut from videos or images when the user requests cutting, restructuring, or assembling foo
+capcut_ailab_submit_plan_response :: Submits a response or revision request to the current editing task. Copy card_id from a plan card for idempote
+capcut_asset_upload_credential :: Authorize local video, audio, and image uploads to CapCut. Use before running the bundled local uploader.
+capcut_attachment_upload :: Upload conversation videos, audio, and images to CapCut for template search, editing, or generation. Video and
+capcut_batch_media_url :: Get available public URLs and metadata for uploaded videos, audio, and images. Use to look up media duration o
+capcut_complete_card_interaction :: Mark a parameter or billing card as completed after its follow-up message is sent successfully.
+capcut_estimate_generation_credits :: Estimate the current account's credit cost when an image or video parameter card needs a price preview.
+capcut_generation_cancel :: Cancel an unfinished image or video generation request when the user asks to stop it.
+capcut_generation_poll :: Retrieve status, user-facing failure messages, estimated wait times, results, and billing information after su
+capcut_get_card_interaction_state :: Check whether a parameter or billing card has completed its action when the card is restored.
+capcut_get_generation_card :: Read saved generation settings and references when resuming an existing parameter card.
+capcut_get_profile :: Connect your CapCut account or view its nickname. Use when you want to sign in, check your connection, or dist
+capcut_image_generate :: Generate images from text or reference images after the user confirms the image generation settings. If this f
+capcut_report_event :: Reports CapCut card and editor interactions.
+capcut_save_generation_card :: Validate or save the selected generation settings when the user submits a parameter card or chooses to add ref
+capcut_template_search :: Submit an asynchronous CapCut template and editing-inspiration search from text, images, or videos. Use capcut
+capcut_template_search_poll :: Check template search progress and return full results for older clients. New clients should use capcut_templa
+capcut_template_search_poll_v2 :: Check template search progress and result count. Use templates_preview_v2 to display a completed, non-empty se
+capcut_video_generate :: Generate videos from text or reference media after the user confirms the video generation settings. If this fl
+check_stdraft_state :: Desktop only. Compares local_package_id with the current version of the session's cloud draft. stale is true w
+editing_plan :: Displays an editing request and its available actions. Use it when task progress requires user input.
+generation_result :: Display all generated images or videos and the actual credit charge after generation and billing have finished
+get_stdraft_snapshot :: Desktop only. Returns the session's cloud draft as a complete stdraft document together with its package_id, t
+prepare_for_image_generation :: Show one image generation settings card with estimated credits when starting or resuming an image generation r
+prepare_for_video_generation :: Show one video generation settings card with estimated credits when starting or resuming a video generation re
+prepare_local_tracking :: Initialize analytics for a local tool before it starts.
+push_stdraft_snapshot :: Desktop only. Saves a complete stdraft document as the session's cloud draft; patches are not accepted. base_p
+search_capcut_material :: Desktop only. Search CapCut music, sound effects and video effects by query. For fonts, text effects, text tem
+start_stdraft_session :: Desktop only. Creates a new stdraft editing session and returns its session_id. Each session is bound to exact
+templates_preview :: Display completed template search results for older clients. New clients should use templates_preview_v2.
+templates_preview_v2 :: Display template cards after a search completes with non-empty results.
+video_preview :: Displays the completed video and its available editing destination. Use it when the editing task provides a co

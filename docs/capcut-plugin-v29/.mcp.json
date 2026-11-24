@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "capcut_creation": {
+      "url": "https://www.capcut.com/api/external_mcp",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "mixed"
+          }
+        }
+      }
+    }
+  }
+}

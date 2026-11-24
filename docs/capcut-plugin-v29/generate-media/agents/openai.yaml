@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate CapCut Images and Videos"
+  short_description: "Generate and display CapCut images and videos"
+  default_prompt: "Use $generate-media to create images or videos with CapCut and show every result."

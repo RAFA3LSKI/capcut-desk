@@ -1,0 +1,10 @@
+import {connect,call} from './capcut.mjs'; import fs from 'node:fs';
+const log=(k,v)=>{fs.appendFileSync('out/testclip.log',`\n## ${k}\n${JSON.stringify(v,null,1)}\n`);};
+const sc=r=>r.structuredContent??(()=>{try{return JSON.parse(r.content?.[0]?.text)}catch{return {text:r.content?.[0]?.text}}})();
+await connect();
+const ses=sc(await call('start_stdraft_session',{platform:'desktop'})); log('session',ses);
+const sid=ses.session_id||ses.draft_session_id||ses.id; console.log('session',sid?'ok':'MISSING '+JSON.stringify(ses).slice(0,300)); if(!sid)process.exit(1);
+const spec={prompt:'A calm beach at sunset, gentle waves, slow push in, no people, no text',model:'seedance2_mini',ratio:'9:16',resolution:'720p',duration_ms:5000,count:1};
+let r=sc(await call('capcut_video_generate',{draft_session_id:sid,spec,platform:'desktop'})); log('generate1',r);
+console.log('generate1',JSON.stringify(r).slice(0,700));
+fs.writeFileSync('out/testclip-state.json',JSON.stringify({sid,spec,r},null,1));

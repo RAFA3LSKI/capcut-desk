@@ -1,0 +1,10 @@
+.capcut-token.json
+.capcut-pending.json
+out/
+login.log
+link.txt
+_misc/
+dist/
+HANDOFF.md
+.DS_Store
+session-check.log

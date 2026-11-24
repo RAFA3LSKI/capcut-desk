@@ -1,0 +1,311 @@
+===== auth
+Usage:
+  dreamina-canvas auth [flags]
+  dreamina-canvas auth [command]
+
+Available Commands:
+  account     Read the currently signed-in account
+  login       Sign in to Dreamina Canvas
+  logout      Sign out of the current profile
+  refresh     Refresh the current sign-in credentials
+  status      Read local sign-in state
+  wait        Wait for an existing sign-in authorization
+
+Flags:
+  -h, --help   Show help for dreamina-canvas auth
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas auth [command] --help" for more information about a command.
+===== auth login
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.
+===== model
+Usage:
+  dreamina-canvas model <name...> [flags]
+  dreamina-canvas model [command]
+
+Available Commands:
+  find        Find a callable canonical model by display name or alias
+  list        List generation models and accepted flags
+
+Flags:
+  -h, --help          Show help for dreamina-canvas model
+      --type string   Resource type: image, video, or audio; omit to search all generation types
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas model [command] --help" for more information about a command.
+===== model list
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.
+===== workflow
+Usage:
+  dreamina-canvas workflow [flags]
+  dreamina-canvas workflow [command]
+
+Available Commands:
+  cancel       Request cancellation of a workflow run (write)
+  capabilities Show workflow capabilities and limits (read-only)
+  confirm      Approve a quote ceiling and get a short-lived confirmation token (write)
+  get          Show the full view of a workflow run (read-only)
+  list         List workflow runs in a project (read-only)
+  quote        Save a quote plan without running the workflow or charging credits
+  run          Start a workflow run (write; replay with the same submitId to resume)
+  template     Workflow template discovery and instantiation
+  wait         Wait for a terminal workflow run; exit 20 on timeout, rerun to resume waiting
+
+Flags:
+  -h, --help   Show help for dreamina-canvas workflow
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas workflow [command] --help" for more information about a command.
+===== workflow quote
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.
+===== workflow run
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.
+===== resource
+Usage:
+  dreamina-canvas resource [flags]
+  dreamina-canvas resource [command]
+
+Available Commands:
+  download    Safely download a successful image resource
+  get         Read stable resource facts in any state (running/success/failed/canceled)
+  upload      Upload local image, video, or audio media and register it as a project resource
+
+Flags:
+  -h, --help   Show help for dreamina-canvas resource
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas resource [command] --help" for more information about a command.
+===== resource download
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.
+===== operation
+Usage:
+  dreamina-canvas operation [flags]
+  dreamina-canvas operation [command]
+
+Available Commands:
+  status      Query a generation operation once
+  wait        Wait for a generation operation to reach a terminal state
+
+Flags:
+  -h, --help   Show help for dreamina-canvas operation
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas operation [command] --help" for more information about a command.
+===== node
+Usage:
+  dreamina-canvas node [flags]
+  dreamina-canvas node [command]
+
+Available Commands:
+  confirm     Approve a credit ceiling for the specified nodes and return a short-lived token
+  create      Create typed canvas nodes without starting generation
+  cutout      Cut out images
+  delete      Delete a batch of nodes after approval; groups are not supported
+  edit        Edit saved typed canvas nodes without starting generation
+  find        Find nodes by filter and return locator fields only (nodeId/type/title/status/tags)
+  interpolate Interpolate videos
+  promote     Promote a sample into a final video
+  quote       Estimate credits for the specified nodes before running them
+  run         Run the specified nodes
+  show        Read views of the specified nodes
+  upscale     Upscale generated images or videos into new nodes
+
+Flags:
+  -h, --help   Show help for dreamina-canvas node
+
+Global Flags:
+      --format string     Output format: json or table
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas node [command] --help" for more information about a command.
+===== node run
+Usage:
+  dreamina-canvas [flags]
+  dreamina-canvas [command]
+
+Available Commands:
+  auth        Manage sign-in and authentication state
+  canvas      Manage canvases
+  completion  Generate the autocompletion script for the specified shell
+  director    Author, synchronize and export Director Stage projects
+  help        Help about any command
+  model       Query generation models and their callable specifications
+  node        Create, edit, delete, read, or run typed canvas nodes
+  operation   Inspect or wait for recoverable operations
+  resource    Query, upload, and download canvas resources
+  schema      Return the command contract for this artifact
+  version     Return version and build information
+  voice       Query voices available for audio generation
+  workflow    Canvas workflow quotes, runs, and templates
+
+Flags:
+      --format string     Output format: json or table
+  -h, --help              Show help for dreamina-canvas
+      --non-interactive   Disable interactive prompts
+      --profile string    Local sign-in state profile (default "default")
+  -v, --version           Show version information
+      --yes               Approve permitted operations without an interactive prompt
+
+Use "dreamina-canvas [command] --help" for more information about a command.

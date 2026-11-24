@@ -1,0 +1,13 @@
+{
+ "content": [
+  {
+   "type": "text",
+   "text": "{\"id\":\"prf_REDACTED\",\"name\":\"TEST_ACCOUNT_1\",\"nickname\":\"TEST_ACCOUNT_1\"}"
+  }
+ ],
+ "structuredContent": {
+  "id": "prf_REDACTED",
+  "name": "TEST_ACCOUNT_1",
+  "nickname": "TEST_ACCOUNT_1"
+ }
+}
