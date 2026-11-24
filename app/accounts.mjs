@@ -4,7 +4,7 @@ import fs from 'node:fs'; import path from 'node:path';
 export function createAccounts(dir){
   fs.mkdirSync(dir,{recursive:true,mode:0o700});
   const F=path.join(dir,'accounts.json'), OLD=path.join(dir,'token.json'), file=id=>path.join(dir,`token-${id}.json`);
-  const write=(f,o)=>fs.writeFileSync(f,JSON.stringify(o,null,1),{mode:0o600});
+  const write=(f,o)=>{fs.writeFileSync(f+'.tmp',JSON.stringify(o,null,1),{mode:0o600}); fs.renameSync(f+'.tmp',f);}; // tmp + rename: a crash never leaves a half-written file
   const read=()=>{try{return JSON.parse(fs.readFileSync(F,'utf8'));}catch{return {active:null,accounts:[]};}};
   const patch=fn=>{const s=read(); fn(s); write(F,s); return s;}; // re-reads accounts.json every time: another copy of the app may have changed it
   if(!fs.existsSync(F)&&fs.existsSync(OLD)){ // order: token copy, then the index, then the rename; a crash in between just repeats the steps

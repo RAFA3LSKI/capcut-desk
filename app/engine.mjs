@@ -17,7 +17,7 @@ export const BAD_KIND='This file type is not supported. Use images (PNG, JPG, WE
 export function createEngine(dir=path.join(os.homedir(),'.capcut-desk'),uploader,{seal,unseal}={}){ // seal/unseal: hosted mode encrypts token and pending files at rest (see hosted.mjs)
   fs.mkdirSync(dir,{recursive:true,mode:0o700});
   const A=createAccounts(dir), PEND=path.join(dir,'pending.json');
-  const save=(f,o)=>fs.writeFileSync(f,seal?seal(JSON.stringify(o)):JSON.stringify(o,null,1),{mode:0o600}); const load=f=>{const t=fs.readFileSync(f,'utf8'); return JSON.parse(unseal?unseal(t):t);};
+  const save=(f,o)=>{fs.writeFileSync(f+'.tmp',seal?seal(JSON.stringify(o)):JSON.stringify(o,null,1),{mode:0o600}); fs.renameSync(f+'.tmp',f);}; /* tmp + rename: a crash never destroys the only copy of a rotated refresh token */ const load=f=>{const t=fs.readFileSync(f,'utf8'); return JSON.parse(unseal?unseal(t):t);};
   const TOK=id=>A.file(id), has=()=>{const a=A.active(); return !!a&&fs.existsSync(TOK(a.id));};
   let mcpSid=null, n=0, draft=null;
   // Silent refresh: the server kills an access token at ~70 h although expires_in says 72 h, and the refresh token rotates on every use.
